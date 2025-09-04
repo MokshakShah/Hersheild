@@ -16,6 +16,7 @@ export interface Evidence {
 
 class EvidenceService {
   private readonly STORAGE_KEY = 'savedEvidence';
+  private activeUserKey: string = '';
   private readonly MAX_AGE_MS = 6 * 30 * 24 * 60 * 60 * 1000; // 6 months in milliseconds
   private readonly MAX_STORAGE_SIZE = 100 * 1024 * 1024; // 100MB max storage
   private readonly COMPRESSION_QUALITY = 0.7; // JPEG compression quality
@@ -27,6 +28,18 @@ class EvidenceService {
     totalOptimizations: 0,
     averageOptimizationTime: 0
   };
+
+  // Build a per-user storage key to isolate evidence by account
+  private getStorageKey(): string {
+    return this.activeUserKey
+      ? `${this.STORAGE_KEY}:${this.activeUserKey}`
+      : this.STORAGE_KEY;
+  }
+
+  // Allow the app to set the current user for namespaced storage
+  setUserKey(userKey: string | null | undefined) {
+    this.activeUserKey = (userKey ?? '').trim();
+  }
 
   // Performance monitoring
   private logPerformance(operation: string, startTime: number) {
@@ -140,7 +153,7 @@ class EvidenceService {
       // Save immediately to localStorage
       const savedEvidence = this.getEvidence();
       savedEvidence.unshift(evidence);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(savedEvidence));
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(savedEvidence));
 
       // Schedule background optimization and cleanup
       this.scheduleBackgroundOptimization(evidence.id, type, dataUri);
@@ -180,7 +193,7 @@ class EvidenceService {
         if (evidenceIndex !== -1) {
           savedEvidence[evidenceIndex].dataUri = optimizedDataUri;
           savedEvidence[evidenceIndex].size = size;
-          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(savedEvidence));
+          localStorage.setItem(this.getStorageKey(), JSON.stringify(savedEvidence));
           console.log(`Background optimization completed for ${type} ${evidenceId}`);
         }
         
@@ -211,7 +224,7 @@ class EvidenceService {
   // Get all evidence
   getEvidence(): Evidence[] {
     try {
-      const saved = localStorage.getItem(this.STORAGE_KEY);
+      const saved = localStorage.getItem(this.getStorageKey());
       if (!saved) return [];
       
       const evidence: Evidence[] = JSON.parse(saved);
@@ -222,7 +235,7 @@ class EvidenceService {
       
       // Update localStorage if some items were expired
       if (validEvidence.length !== evidence.length) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(validEvidence));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(validEvidence));
         console.log(`Cleaned up ${evidence.length - validEvidence.length} expired evidence items`);
       }
       
@@ -240,7 +253,7 @@ class EvidenceService {
       const updatedEvidence = evidence.filter(item => item.id !== id);
       
       if (updatedEvidence.length !== evidence.length) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedEvidence));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(updatedEvidence));
         return true;
       }
       return false;
@@ -253,7 +266,7 @@ class EvidenceService {
   // Delete all evidence
   deleteAllEvidence(): boolean {
     try {
-      localStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem(this.getStorageKey());
       return true;
     } catch (error) {
       console.error('Error deleting all evidence:', error);
@@ -269,7 +282,7 @@ class EvidenceService {
       const validEvidence = evidence.filter(item => (now - item.createdAt) < this.MAX_AGE_MS);
       
       if (validEvidence.length !== evidence.length) {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(validEvidence));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(validEvidence));
         console.log(`Cleaned up ${evidence.length - validEvidence.length} expired evidence items`);
       }
     } catch (error) {
@@ -302,7 +315,7 @@ class EvidenceService {
           }
         }
         
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(evidenceToKeep));
+        localStorage.setItem(this.getStorageKey(), JSON.stringify(evidenceToKeep));
         console.log(`Storage limit exceeded, removed ${evidence.length - evidenceToKeep.length} oldest items`);
       }
     } catch (error) {

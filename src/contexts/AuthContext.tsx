@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
+import { evidenceService } from '@/services/evidence'
 
 interface User {
   id: string
@@ -36,9 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await response.json()
         console.log('Auth successful:', data.user)
         setUser(data.user)
+        // Set per-user key for evidence storage
+        evidenceService.setUserKey(data.user?.id)
       } else {
         console.log('Auth failed, status:', response.status)
         setUser(null)
+        evidenceService.setUserKey(null)
         // If token is invalid, clear any existing cookies
         if (response.status === 401) {
           document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
@@ -93,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         console.log('Login successful:', data.user)
         setUser(data.user)
+        evidenceService.setUserKey(data.user?.id)
         toast({
           title: "Success!",
           description: "Logged in successfully.",
@@ -140,6 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         console.log('Signup successful:', data.user)
         setUser(data.user)
+        evidenceService.setUserKey(data.user?.id)
         toast({
           title: "Success!",
           description: "Account created successfully. You are now logged in.",
@@ -179,6 +185,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         console.log('Logout successful')
         setUser(null)
+        // Clear active user key so evidence is not shared
+        evidenceService.setUserKey(null)
         toast({
           title: "Logged out",
           description: "You have been successfully logged out.",

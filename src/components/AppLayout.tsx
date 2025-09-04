@@ -130,6 +130,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+          
         </SidebarContent>
         <SidebarFooter>
             <SidebarMenu>

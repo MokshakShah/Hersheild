@@ -20,11 +20,13 @@ import {
 import Link from "next/link";
 import { evidenceService, type Evidence } from "@/services/evidence";
 import { formatFileSize } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 
 
 export default function EvidencePage() {
+    const { user } = useAuth();
     const [evidence, setEvidence] = useState<Evidence[]>([]);
     const { toast } = useToast();
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -46,6 +48,8 @@ export default function EvidencePage() {
     };
 
     useEffect(() => {
+        // Ensure evidence is scoped to current user
+        evidenceService.setUserKey(user?.id);
         refreshEvidence();
         
         // Set up periodic refresh to catch background optimizations
@@ -54,7 +58,7 @@ export default function EvidencePage() {
         }, 2000); // Refresh every 2 seconds to catch background optimizations
         
         return () => clearInterval(refreshInterval);
-    }, [toast]);
+    }, [toast, user]);
 
     const handleManualRefresh = async () => {
         setIsRefreshing(true);
