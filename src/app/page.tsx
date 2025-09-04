@@ -4,7 +4,6 @@ import { EmergencyContacts } from "../components/EmergencyContacts";
 import { FeatureToggles } from "../components/FeatureToggler";
 import { LiveLocation } from "../components/LiveLocation";
 import { SOSButton } from "../components/SOSButton";
-import { SafetyAssessment } from "../components/SafetyAssessment";
 import { AuthStatus } from "../components/AuthStatus";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../contexts/AuthContext";
@@ -14,6 +13,7 @@ import { ActionButtons } from "../components/ActionButton";
 import { PersonalContacts } from "../components/PersonalContacts";
 import { sendEmergencySms } from "./actions";
 import { Shield, User, Calendar } from "lucide-react";
+import { NearbyServices } from "../components/NearbyServices";
 import { getContacts, Contact } from "../services/contacts";
 import { useEffect, useState } from "react";
 
@@ -361,7 +361,7 @@ export default function Home() {
               <FeatureToggles onSos={handleSos} />
           </div>
           <div className="lg:col-span-2">
-              <SafetyAssessment />
+              <NearbyServices />
           </div>
         </div>
         <div className="grid gap-4">

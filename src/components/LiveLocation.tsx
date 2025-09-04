@@ -23,10 +23,14 @@ export function LiveLocation() {
 
     const watcher = navigator.geolocation.watchPosition(
       (position) => {
-        setLocation({
+        const next = {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
-        });
+        };
+        setLocation(next);
+        try {
+          localStorage.setItem('liveLocation', JSON.stringify(next));
+        } catch {}
         setError(null);
         setLoading(false);
       },

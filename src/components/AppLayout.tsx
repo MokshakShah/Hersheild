@@ -120,6 +120,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === "/nearby-help"}>
+                <Link href="/nearby-help">
+                  <Shield />
+                  Nearby Help
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
 
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname === "/profile"}>
