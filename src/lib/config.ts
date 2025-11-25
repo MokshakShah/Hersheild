@@ -7,7 +7,7 @@ export const config = {
     uri: process.env.MONGODB_URI || 'mongodb+srv://cottonshah7:hersheild%40123@hersheild.bwrhnaq.mongodb.net/safeguard-circle',
   },
   app: {
-    name: 'Safeguard Circle',
+    name: 'Hershield',
     description: 'Your personal safety companion',
   }
 }

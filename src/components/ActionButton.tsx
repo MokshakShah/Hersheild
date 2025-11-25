@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
-import { Camera, Mic, Ban, ImageUp, Square, PhoneIncoming, Loader2 } from "lucide-react";
+import { Camera, Mic, Ban, ImageUp, Square, PhoneIncoming, Loader2, Repeat2 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useRouter } from 'next/navigation';
@@ -21,6 +21,7 @@ export function ActionButtons() {
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const [isCameraLoading, setIsCameraLoading] = useState(false); // Loading state for camera
     const [isSavingPhoto, setIsSavingPhoto] = useState(false); // Loading state for photo saving
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment'); // Track camera facing mode
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -49,13 +50,44 @@ export function ActionButtons() {
         };
     }, []);
 
-    const setupCameraStream = async () => {
+    const setupCameraStream = async (camera: 'user' | 'environment' = 'environment') => {
         setIsCameraLoading(true);
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            setHasCameraPermission(true);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
+            // Stop existing stream before switching cameras
+            if (videoRef.current?.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach((track) => track.stop());
+            }
+
+            // Request camera with specified facing mode
+            const constraints: MediaStreamConstraints = {
+                video: {
+                    facingMode: { ideal: camera }
+                }
+            };
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                setHasCameraPermission(true);
+                setFacingMode(camera);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            } catch (specificCameraError) {
+                // If requested camera is not available, try the other one
+                console.warn(`${camera} camera not available, trying alternative:`, specificCameraError);
+                const alternativeCamera = camera === 'environment' ? 'user' : 'environment';
+                const alternativeConstraints: MediaStreamConstraints = {
+                    video: {
+                        facingMode: { ideal: alternativeCamera }
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(alternativeConstraints);
+                setHasCameraPermission(true);
+                setFacingMode(alternativeCamera);
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
             }
         } catch (error) {
             console.error('Error accessing camera:', error);
@@ -73,7 +105,7 @@ export function ActionButtons() {
     const handleToggleCamera = () => {
         if (!showCamera) {
             setShowCamera(true);
-            setupCameraStream();
+            setupCameraStream('environment'); // Start with back camera
         } else {
             setShowCamera(false);
             if (videoRef.current?.srcObject) {
@@ -82,6 +114,11 @@ export function ActionButtons() {
                 videoRef.current.srcObject = null;
             }
         }
+    };
+
+    const handleFlipCamera = async () => {
+        const newFacingMode = facingMode === 'environment' ? 'user' : 'environment';
+        await setupCameraStream(newFacingMode);
     };
 
 
@@ -271,11 +308,11 @@ export function ActionButtons() {
                             )}
                         </div>
                         <canvas ref={canvasRef} className="hidden" />
-                        <div className="flex w-full gap-2">
+                        <div className="flex w-full gap-2 flex-wrap justify-center">
                             <Button
-                                className="w-full"
+                                className="flex-1 min-w-[120px]"
                                 onClick={handleCaptureAndAlert}
-                                disabled={hasCameraPermission !== true || isSavingPhoto}
+                                disabled={hasCameraPermission !== true || isSavingPhoto || isCameraLoading}
                             >
                                 {isSavingPhoto ? (
                                     <>
@@ -285,11 +322,21 @@ export function ActionButtons() {
                                 ) : (
                                     <>
                                         <ImageUp className="mr-2 h-5 w-5" />
-                                        Capture & Save
+                                        Capture
                                     </>
                                 )}
                             </Button>
-                            <Button className="w-full" variant="outline" onClick={handleToggleCamera} disabled={isSavingPhoto || isCameraLoading}>
+                            <Button 
+                                className="flex-1 min-w-[120px]" 
+                                variant="secondary" 
+                                onClick={handleFlipCamera}
+                                disabled={isSavingPhoto || isCameraLoading}
+                                title={facingMode === 'environment' ? 'Switch to Front Camera' : 'Switch to Back Camera'}
+                            >
+                                <Repeat2 className="mr-2 h-5 w-5" />
+                                Flip
+                            </Button>
+                            <Button className="flex-1 min-w-[120px]" variant="outline" onClick={handleToggleCamera} disabled={isSavingPhoto || isCameraLoading}>
                                 <Ban className="mr-2 h-5 w-5" />
                                 Cancel
                             </Button>

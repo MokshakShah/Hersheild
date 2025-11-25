@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/AppLayout';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
-  title: 'Safeguard Circle',
+  title: 'Hershield',
   description: 'Your personal safety companion.',
 };
 
