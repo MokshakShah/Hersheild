@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
+import { getSupabaseAdmin } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,10 +25,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, phone_number, created_at, updated_at')
+      .eq('id', decodedToken.userId)
+      .maybeSingle();
 
-    // Find user
-    const user = await User.findById(decodedToken.userId).select('-password');
+    if (error) {
+      console.error('Profile lookup error:', error);
+      return NextResponse.json(
+        { error: 'Failed to load profile' },
+        { status: 500 }
+      );
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -40,11 +50,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
-        phoneNumber: user.phoneNumber,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        phoneNumber: user.phone_number,
+        createdAt: user.created_at,
+        updatedAt: user.updated_at
       }
     });
 

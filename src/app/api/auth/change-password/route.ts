@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
 import { verifyToken } from '@/lib/jwt';
 import { z } from 'zod';
+import { getSupabaseAdmin } from '@/lib/supabase';
+import bcrypt from 'bcryptjs';
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     const body = await request.json();
     
@@ -47,8 +47,20 @@ export async function POST(request: NextRequest) {
 
     const { currentPassword, newPassword } = validationResult.data;
 
-    // Find user
-    const user = await User.findById(decodedToken.userId);
+    const { data: user, error: fetchError } = await supabase
+      .from('users')
+      .select('id, password_hash')
+      .eq('id', decodedToken.userId)
+      .maybeSingle();
+
+    if (fetchError) {
+      console.error('Change password lookup error:', fetchError);
+      return NextResponse.json(
+        { error: 'Failed to verify user' },
+        { status: 500 }
+      );
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -57,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
         { error: 'Current password is incorrect' },
@@ -66,8 +78,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Update password
-    user.password = newPassword;
-    await user.save();
+    const newHash = await bcrypt.hash(newPassword, 12);
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ password_hash: newHash })
+      .eq('id', decodedToken.userId);
+
+    if (updateError) {
+      console.error('Change password update error:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update password' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,

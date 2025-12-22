@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import Contact from '@/models/Contact';
 import { verifyToken } from '@/lib/jwt';
+import { getSupabaseAdmin } from '@/lib/supabase';
+
+const serializeContact = (row: any) => ({
+  _id: row.id,
+  id: row.id,
+  userId: row.user_id,
+  name: row.name,
+  phoneNumber: row.phone_number,
+  relationship: row.relationship,
+  isEmergency: row.is_emergency,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
 // PUT - Update a contact
 export async function PUT(
@@ -9,7 +20,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     // Get the auth token from cookies
     const token = request.cookies.get('auth-token')?.value;
@@ -49,17 +60,26 @@ export async function PUT(
       }
     }
 
-    // Find and update the contact (ensure it belongs to the user)
-    const contact = await Contact.findOneAndUpdate(
-      { _id: params.id, userId },
-      {
+    const { data: contact, error } = await supabase
+      .from('contacts')
+      .update({
         name,
-        phoneNumber: formattedPhoneNumber,
+        phone_number: formattedPhoneNumber,
         relationship: relationship || '',
-        isEmergency: isEmergency || false
-      },
-      { new: true, runValidators: true }
-    );
+        is_emergency: isEmergency || false,
+      })
+      .eq('id', params.id)
+      .eq('user_id', userId)
+      .select('*')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Update contact error:', error);
+      return NextResponse.json(
+        { error: 'Failed to update contact' },
+        { status: 500 }
+      );
+    }
 
     if (!contact) {
       return NextResponse.json(
@@ -71,7 +91,7 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       message: 'Contact updated successfully',
-      contact
+      contact: serializeContact(contact)
     });
 
   } catch (error: any) {
@@ -89,7 +109,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     // Get the auth token from cookies
     const token = request.cookies.get('auth-token')?.value;
@@ -104,13 +124,23 @@ export async function DELETE(
     const decoded = verifyToken(token);
     const userId = decoded.userId;
 
-    // Find and delete the contact (ensure it belongs to the user)
-    const contact = await Contact.findOneAndDelete({ 
-      _id: params.id, 
-      userId 
-    });
+    const { error, data: deleted } = await supabase
+      .from('contacts')
+      .delete()
+      .eq('id', params.id)
+      .eq('user_id', userId)
+      .select('id')
+      .maybeSingle();
 
-    if (!contact) {
+    if (error) {
+      console.error('Delete contact error:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete contact' },
+        { status: 500 }
+      );
+    }
+
+    if (!deleted) {
       return NextResponse.json(
         { error: 'Contact not found or access denied' },
         { status: 404 }

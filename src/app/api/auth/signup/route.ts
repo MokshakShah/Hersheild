@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
 import { generateToken } from '@/lib/jwt';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(50, 'Name cannot be more than 50 characters'),
@@ -13,10 +14,8 @@ const signupSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     console.log('Starting signup process...');
-    
-    console.log('Connecting to database...');
-    await dbConnect();
-    console.log('Database connected successfully');
+
+    const supabase = getSupabaseAdmin();
 
     const body = await request.json();
     console.log('Request body received:', { ...body, password: '[HIDDEN]' });
@@ -35,7 +34,20 @@ export async function POST(request: NextRequest) {
     console.log('Validation passed, checking for existing user...');
 
     // Check if user already exists
-    const existingUser = await User.findOne({ phoneNumber });
+    const { data: existingUser, error: existingError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('phone_number', phoneNumber)
+      .maybeSingle();
+
+    if (existingError) {
+      console.error('Error checking existing user:', existingError);
+      return NextResponse.json(
+        { error: 'Failed to verify existing users' },
+        { status: 500 }
+      );
+    }
+
     if (existingUser) {
       console.log('User already exists with phone number:', phoneNumber);
       return NextResponse.json(
@@ -44,24 +56,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Creating new user...');
-    // Create new user
-    const user = new User({
-      name,
-      phoneNumber,
-      password
-    });
+    const userId = randomUUID();
+    const passwordHash = await bcrypt.hash(password, 12);
 
-    console.log('Saving user to database...');
-    await user.save();
-    console.log('User saved successfully, ID:', user._id);
+    console.log('Creating new user...');
+    const { data: insertedUser, error: insertError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        name,
+        phone_number: phoneNumber,
+        password_hash: passwordHash,
+      })
+      .select('id, name, phone_number')
+      .single();
+
+    if (insertError || !insertedUser) {
+      console.error('Signup insert error:', insertError);
+      return NextResponse.json(
+        { error: 'Failed to create user' },
+        { status: 500 }
+      );
+    }
 
     // Generate JWT token
     console.log('Generating JWT token...');
     const token = generateToken({
-      userId: user._id.toString(),
-      phoneNumber: user.phoneNumber,
-      name: user.name
+      userId: insertedUser.id,
+      phoneNumber: insertedUser.phone_number,
+      name: insertedUser.name
     });
     console.log('JWT token generated successfully');
 
@@ -70,9 +93,9 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'User created successfully',
       user: {
-        id: user._id,
-        name: user.name,
-        phoneNumber: user.phoneNumber
+        id: insertedUser.id,
+        name: insertedUser.name,
+        phoneNumber: insertedUser.phone_number
       }
     });
 
@@ -95,13 +118,6 @@ export async function POST(request: NextRequest) {
       name: error.name
     });
     
-    if (error.code === 11000) {
-      return NextResponse.json(
-        { error: 'Phone number already exists' },
-        { status: 409 }
-      );
-    }
-
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }

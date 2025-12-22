@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { FileImage, Trash2, Mic, MapPin, HardDrive, Clock, AlertTriangle } from "lucide-react";
+import { FileImage, Trash2, Mic, MapPin, HardDrive, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -30,62 +30,37 @@ export default function EvidencePage() {
     const [evidence, setEvidence] = useState<Evidence[]>([]);
     const { toast } = useToast();
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [storageStats, setStorageStats] = useState(evidenceService.getStorageStats());
 
-    const refreshEvidence = () => {
+    const totalSize = evidence.reduce((sum, item) => sum + (item.size || 0), 0);
+
+    const refreshEvidence = async () => {
         try {
-            const savedEvidence = evidenceService.getEvidence();
+            setIsRefreshing(true);
+            const savedEvidence = await evidenceService.getEvidence();
             setEvidence(savedEvidence);
-            setStorageStats(evidenceService.getStorageStats());
         } catch (error) {
             console.error("Error reading evidence:", error);
             toast({
                 variant: 'destructive',
                 title: "Load Error",
-                description: "Could not load saved evidence from your browser.",
-            });
-        }
-    };
-
-    useEffect(() => {
-        // Ensure evidence is scoped to current user
-        evidenceService.setUserKey(user?.id);
-        refreshEvidence();
-        
-        // Set up periodic refresh to catch background optimizations
-        const refreshInterval = setInterval(() => {
-            refreshEvidence();
-        }, 2000); // Refresh every 2 seconds to catch background optimizations
-        
-        return () => clearInterval(refreshInterval);
-    }, [toast, user]);
-
-    const handleManualRefresh = async () => {
-        setIsRefreshing(true);
-        try {
-            // Trigger manual cleanup
-            await evidenceService.manualCleanup();
-            refreshEvidence();
-            toast({ title: "Evidence refreshed and optimized" });
-        } catch (error) {
-            console.error("Error refreshing evidence:", error);
-            toast({
-                variant: 'destructive',
-                title: "Refresh Error",
-                description: "Could not refresh evidence.",
+                description: "Could not load saved evidence.",
             });
         } finally {
             setIsRefreshing(false);
         }
     };
 
-    const deleteEvidence = (id: string) => {
-        if (evidenceService.deleteEvidence(id)) {
-            const updatedEvidence = evidenceService.getEvidence();
-            setEvidence(updatedEvidence);
-            setStorageStats(evidenceService.getStorageStats());
+    useEffect(() => {
+        evidenceService.setUserKey(user?.id);
+        refreshEvidence();
+    }, [toast, user]);
+
+    const deleteEvidence = async (id: string) => {
+        try {
+            await evidenceService.deleteEvidence(id);
+            await refreshEvidence();
             toast({ title: "Evidence Deleted" });
-        } else {
+        } catch (error) {
             toast({
                 variant: 'destructive',
                 title: "Delete Error",
@@ -94,12 +69,12 @@ export default function EvidencePage() {
         }
     };
     
-    const deleteAllEvidence = () => {
-        if (evidenceService.deleteAllEvidence()) {
+    const deleteAllEvidence = async () => {
+        try {
+            await evidenceService.deleteAllEvidence();
             setEvidence([]);
-            setStorageStats(evidenceService.getStorageStats());
             toast({ title: "All evidence cleared", variant: "destructive" });
-        } else {
+        } catch (error) {
             toast({
                 variant: 'destructive',
                 title: "Delete Error",
@@ -113,37 +88,31 @@ export default function EvidencePage() {
             <CardHeader className="flex-row items-start justify-between">
                 <div>
                     <CardTitle>Saved Evidence</CardTitle>
-                    <CardDescription>Photos and audio clips captured locally on your device.</CardDescription>
+                    <CardDescription>Photos and audio clips captured to secure cloud storage.</CardDescription>
                     
                     {/* Storage Information */}
                     <div className="mt-4 space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <HardDrive className="h-4 w-4" />
                             <span>
-                                {evidence.length} items • {formatFileSize(storageStats.totalSize)} / {formatFileSize(storageStats.maxSize)}
+                                {evidence.length} items • {formatFileSize(totalSize)}
                             </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="h-4 w-4" />
                             <span>
-                                Auto-delete after 6 months • Cleanup every hour
+                                Files are stored with your account for safe retrieval
                             </span>
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                onClick={handleManualRefresh}
+                                onClick={refreshEvidence}
                                 disabled={isRefreshing}
                                 className="ml-2 h-6 px-2 text-xs"
                             >
-                                {isRefreshing ? "Refreshing..." : "Refresh"}
+                                {isRefreshing ? "Refreshing..." : "Reload"}
                             </Button>
                         </div>
-                        {storageStats.totalSize > storageStats.maxSize * 0.8 && (
-                            <div className="flex items-center gap-2 text-sm text-amber-600">
-                                <AlertTriangle className="h-4 w-4" />
-                                <span>Storage nearly full - oldest items will be automatically removed</span>
-                            </div>
-                        )}
                     </div>
                 </div>
                  {evidence.length > 0 && (
@@ -175,8 +144,25 @@ export default function EvidencePage() {
                         {evidence.map((item) => (
                             <div key={item.id} className="relative group border rounded-lg p-2 flex flex-col bg-muted/20">
                                 {item.type === 'photo' ? (
-                                    <div className="aspect-video w-full overflow-hidden rounded-md">
-                                        <Image src={item.dataUri} alt="Captured evidence" width={400} height={300} className="w-full h-full object-cover" />
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-md">
+                                        <Image
+                                            src={item.dataUri}
+                                            alt="Captured evidence"
+                                            width={400}
+                                            height={300}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        {item.location && (
+                                            <Link
+                                                href={`https://www.google.com/maps?q=${item.location.latitude},${item.location.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] text-white hover:bg-black/80"
+                                            >
+                                                <MapPin className="h-3 w-3" />
+                                                <span>View location</span>
+                                            </Link>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center aspect-video bg-muted rounded-md p-4">

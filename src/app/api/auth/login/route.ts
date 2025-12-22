@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
 import { generateToken } from '@/lib/jwt';
+import { getSupabaseAdmin } from '@/lib/supabase';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 
 const loginSchema = z.object({
   phoneNumber: z.string().regex(/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number'),
@@ -11,7 +11,7 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     const body = await request.json();
     
@@ -27,7 +27,20 @@ export async function POST(request: NextRequest) {
     const { phoneNumber, password } = validationResult.data;
 
     // Find user by phone number
-    const user = await User.findOne({ phoneNumber });
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, name, phone_number, password_hash')
+      .eq('phone_number', phoneNumber)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Login lookup error:', error);
+      return NextResponse.json(
+        { error: 'Failed to verify credentials' },
+        { status: 500 }
+      );
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid phone number or password' },
@@ -36,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: 'Invalid phone number or password' },
@@ -46,8 +59,8 @@ export async function POST(request: NextRequest) {
 
     // Generate JWT token
     const token = generateToken({
-      userId: user._id.toString(),
-      phoneNumber: user.phoneNumber,
+      userId: user.id,
+      phoneNumber: user.phone_number,
       name: user.name
     });
 
@@ -56,9 +69,9 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login successful',
       user: {
-        id: user._id,
+        id: user.id,
         name: user.name,
-        phoneNumber: user.phoneNumber
+        phoneNumber: user.phone_number
       }
     });
 

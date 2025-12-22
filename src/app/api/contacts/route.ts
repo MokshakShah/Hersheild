@@ -1,12 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import Contact from '@/models/Contact';
 import { verifyToken } from '@/lib/jwt';
+import { getSupabaseAdmin } from '@/lib/supabase';
+
+const serializeContact = (row: any) => ({
+  _id: row.id,
+  id: row.id,
+  userId: row.user_id,
+  name: row.name,
+  phoneNumber: row.phone_number,
+  relationship: row.relationship,
+  isEmergency: row.is_emergency,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
 
 // GET - Get all contacts for the authenticated user
 export async function GET(request: NextRequest) {
   try {
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     // Get the auth token from cookies
     const token = request.cookies.get('auth-token')?.value;
@@ -21,12 +32,23 @@ export async function GET(request: NextRequest) {
     const decoded = verifyToken(token);
     const userId = decoded.userId;
 
-    // Get all contacts for this user
-    const contacts = await Contact.find({ userId }).sort({ createdAt: -1 });
+    const { data, error } = await supabase
+      .from('contacts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Get contacts error:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch contacts' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      contacts
+      contacts: (data || []).map(serializeContact)
     });
 
   } catch (error: any) {
@@ -41,7 +63,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new contact for the authenticated user
 export async function POST(request: NextRequest) {
   try {
-    await dbConnect();
+    const supabase = getSupabaseAdmin();
 
     // Get the auth token from cookies
     const token = request.cookies.get('auth-token')?.value;
@@ -83,11 +105,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if contact already exists for this user
-    const existingContact = await Contact.findOne({ 
-      userId, 
-      phoneNumber: formattedPhoneNumber 
-    });
+    const { data: existingContact, error: existingError } = await supabase
+      .from('contacts')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('phone_number', formattedPhoneNumber)
+      .maybeSingle();
+
+    if (existingError) {
+      console.error('Check existing contact error:', existingError);
+      return NextResponse.json(
+        { error: 'Failed to verify existing contacts' },
+        { status: 500 }
+      );
+    }
 
     if (existingContact) {
       return NextResponse.json(
@@ -96,21 +127,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new contact
-    const contact = new Contact({
-      userId,
-      name,
-      phoneNumber: formattedPhoneNumber,
-      relationship: relationship || '',
-      isEmergency: isEmergency || false
-    });
+    const { data: insertedContact, error: insertError } = await supabase
+      .from('contacts')
+      .insert({
+        user_id: userId,
+        name,
+        phone_number: formattedPhoneNumber,
+        relationship: relationship || '',
+        is_emergency: isEmergency || false,
+      })
+      .select('*')
+      .single();
 
-    await contact.save();
+    if (insertError || !insertedContact) {
+      console.error('Create contact error:', insertError);
+      return NextResponse.json(
+        { error: 'Failed to create contact' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Contact created successfully',
-      contact
+      contact: serializeContact(insertedContact)
     });
 
   } catch (error: any) {
