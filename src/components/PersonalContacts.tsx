@@ -41,9 +41,9 @@ export function PersonalContacts() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-sm text-muted-foreground">
+                {/* <p className="text-sm text-muted-foreground">
                     You can add, edit, or remove your trusted emergency contacts. These are the people who will receive an alert with your location when you trigger an SOS.
-                </p>
+                </p> */}
                 {!loading && totalContacts > 0 && (
                     <div className="mt-3 p-2 bg-muted rounded-md">
                         <p className="text-xs text-muted-foreground">

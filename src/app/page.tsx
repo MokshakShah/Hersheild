@@ -300,74 +300,40 @@ export default function Home() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-2xl flex items-center gap-3 text-blue-800">
-            <Shield className="h-8 w-8" />
-            Welcome to Your HomePage 
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-3">
-            {/* <User className="h-6 w-6 text-blue-600" /> */}
-            <span className="text-xl font-semibold text-blue-700">
-              {/* Hello, {user.name}! 👋 */}
-            </span>
-          </div>
-          <div className="flex items-center gap-3 text-blue-600">
-            <Calendar className="h-5 w-5" />
-            <span className="text-sm">
-              Current Login Time : {currentDate} • {currentTime}
-            </span>
-          </div>
-          {/* <p className="text-blue-600 text-sm">
-            Your personal safety companion is here to protect you 24/7
-          </p> */}
-        </CardContent>
-      </Card>
+    <div className="space-y-4 pb-20 relative">
+      {/* Top Bar: Logo, Username, SOS Button */}
+      <div className="flex items-center justify-between pt-4 px-4">
+        {/* Dashboard with Logo and Username */}
+        <div className="flex flex-col items-start">
+          <span className="flex items-center gap-2">
+          </span>
+          <span className="text-sm text-muted-foreground font-medium mt-1">{user?.name}</span>
+        </div>
+        {/* SOS Button on right */}
+        <div className="flex-shrink-0">
+          <SOSButton onSos={handleSos} />
+        </div>
+      </div>
+
+      {/* Emergency Services below top bar */}
+      <div className="pt-2 px-2">
+        <EmergencyContacts />
+      </div>
 
       {/* Main Dashboard Content */}
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
         <div className="grid gap-4 lg:col-span-2">
-          <Card className="p-4 bg-card shadow-lg rounded-2xl">
-            <SOSButton onSos={handleSos} />
-            {/* Debug location buttons */}
-            <div className="mt-4 pt-4 border-t space-y-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={checkLocationPermission}
-                className="text-xs w-full"
-              >
-                🔍 Check Location Permission
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={testLocation}
-                className="text-xs w-full"
-              >
-                🧪 Test Location Access
-              </Button>
-              <div className="text-xs text-muted-foreground text-center p-2 bg-muted rounded">
-                💡 Tip: Try moving to a window or going outside if location times out
-              </div>
-            </div>
-          </Card>
           <div className="grid gap-4 md:grid-cols-2">
-              <ActionButtons />
-              <FeatureToggles onSos={handleSos} />
+            <ActionButtons />
+            <FeatureToggles onSos={handleSos} />
           </div>
           <div className="lg:col-span-2">
-              <NearbyServices />
+            <NearbyServices />
           </div>
         </div>
         <div className="grid gap-4">
-          <AuthStatus />
+          {/* <AuthStatus /> removed as requested */}
           <PersonalContacts />
-          <EmergencyContacts />
           <LiveLocation />
         </div>
       </div>

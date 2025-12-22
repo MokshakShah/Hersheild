@@ -61,11 +61,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar  className="bg-gray-200">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Shield className="h-6 w-6" />
-            </div>
+            <img src="sounds/logo.png" alt="Logo" className="h-7 w-7 object-contain" />
             <div className="flex flex-col">
-              <h2 className="text-lg font-semibold">Safeguard Circle</h2>
+              <h2 className="text-lg font-semibold">Hersheild</h2>
               <p className="text-xs text-muted-foreground">Your safety companion</p>
             </div>
           </div>
@@ -158,10 +156,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-xl font-semibold capitalize">
               {pathname === '/' ? 'Dashboard' : pathname.substring(1).replace('-', ' ')}
             </h1>
-            <div className="text-sm text-muted-foreground">
-              Welcome, {user.name}
-            </div>
+            <img src="sounds/logo.png" alt="Logo" className="h-8 w-8 object-contain ml-2" />
           </div>
+          {/* <div className="text-sm text-muted-foreground">
+            Welcome, {user.name}
+          </div> */}
         </header>
         <main className="flex-1 p-4 sm:px-6 sm:py-0">
           {children}
