@@ -300,7 +300,7 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFE6EC 0%, #FFD1DC 50%, #FFF5F7 100%)' }}>
       {/* Top bar with only alerts */}
       <div className="flex items-center justify-end px-4 py-2 bg-transparent">
         {/* SOS Button at top right */}
@@ -314,12 +314,12 @@ export default function Home() {
         <div className="pt-2 px-2">
           <div className="flex flex-row gap-8 items-center justify-center">
             <Link href="/emergency-service" className="flex-1 max-w-[270px]">
-              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 transition text-center shadow-sm">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-pink-50 transition text-center shadow-sm">
                 <span className="text-xl font-semibold">Emergency Service</span>
               </div>
             </Link>
             <Link href="/nearby-help" className="flex-1 max-w-[270px]">
-              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 transition text-center shadow-sm">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-pink-50 transition text-center shadow-sm">
                 <span className="text-xl font-semibold">Nearby Help</span>
               </div>
             </Link>
