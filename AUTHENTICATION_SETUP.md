@@ -67,7 +67,6 @@ Create a `.env.local` file in your project root:
 
 ```env
 JWT_SECRET=your-super-secure-jwt-secret-key-change-this-in-production
-MONGODB_URI=mongodb+srv://cottonshah7:hersheild%40123@hersheild.bwrhnaq.mongodb.net/
 ```
 
 ## Security Features

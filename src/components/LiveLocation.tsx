@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { MapPin, Share2 } from "lucide-react";
@@ -13,6 +13,43 @@ export function LiveLocation() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const watcherRef = useRef<number | null>(null);
+
+  // Background refresh every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const next = {
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            };
+            setLocation(next);
+            try {
+              localStorage.setItem('liveLocation', JSON.stringify(next));
+            } catch {}
+            setError(null);
+            setLoading(false);
+          },
+          (err) => {
+            if (err.code === err.PERMISSION_DENIED) {
+                setError("Location access was denied. Please enable it in your browser settings.");
+            } else {
+                setError("Unable to retrieve your location at this time.");
+            }
+            setLoading(false);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -20,8 +57,7 @@ export function LiveLocation() {
       setLoading(false);
       return;
     }
-
-    const watcher = navigator.geolocation.watchPosition(
+    watcherRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const next = {
           lat: position.coords.latitude,
@@ -40,7 +76,6 @@ export function LiveLocation() {
         } else {
             setError("Unable to retrieve your location at this time.");
         }
-        console.error(err.message);
         setLoading(false);
       },
       {
@@ -49,8 +84,11 @@ export function LiveLocation() {
           maximumAge: 0
       }
     );
-
-    return () => navigator.geolocation.clearWatch(watcher);
+    return () => {
+      if (watcherRef.current !== null) {
+        navigator.geolocation.clearWatch(watcherRef.current);
+      }
+    };
   }, []);
 
   const handleShare = () => {
@@ -88,7 +126,54 @@ export function LiveLocation() {
         ) : error ? (
             <Alert variant="destructive">
                 <AlertTitle>Location Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>
+                  {error}
+                  <br />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => {
+                      setLoading(true);
+                      setError(null);
+                      if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            const next = {
+                              lat: position.coords.latitude,
+                              lon: position.coords.longitude,
+                            };
+                            setLocation(next);
+                            try {
+                              localStorage.setItem('liveLocation', JSON.stringify(next));
+                            } catch {}
+                            setError(null);
+                            setLoading(false);
+                          },
+                          (err) => {
+                            if (err.code === err.PERMISSION_DENIED) {
+                                setError("Location access was denied. Please enable it in your browser settings.");
+                            } else {
+                                setError("Unable to retrieve your location at this time.");
+                            }
+                            setLoading(false);
+                          },
+                          {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                          }
+                        );
+                      }
+                    }}
+                  >
+                    Retry
+                  </Button>
+                  <br />
+                  <span className="text-xs text-muted-foreground">
+                    Make sure location is enabled in your browser/device settings and you are using HTTPS.
+                  </span>
+                </AlertDescription>
             </Alert>
         ) : location ? (
           <div className="flex flex-col gap-2 p-3 bg-muted/50 rounded-lg">
