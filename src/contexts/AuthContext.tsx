@@ -31,14 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      console.log('Checking auth status...')
+      // console.log('Checking auth status...')
       const response = await fetch('/api/auth/profile')
       if (response.ok) {
         const data = await response.json()
-        console.log('Auth successful:', data.user)
+        // console.log('Auth successful:', data.user)
         setUser(data.user)
         // Set per-user key for evidence storage
-        evidenceService.setUserKey(data.user?.id)
+        // evidenceService.setUserKey(data.user?.id)
       } else {
         console.log('Auth failed, status:', response.status)
         setUser(null)
@@ -58,19 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    console.log('AuthProvider mounted, checking auth...')
+    // console.log('AuthProvider mounted, checking auth...')
     // Only check auth if we're not on login/signup pages
     if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname
+      const pathname = window.location.pathname;
       if (pathname === '/login' || pathname === '/signup') {
-        console.log('On auth page, skipping auth check')
-        setLoading(false)
-        setInitialized(true)
-        return
+        setLoading(false);
+        setInitialized(true);
+        return;
       }
     }
     // Immediate auth check for faster response
-    checkAuth()
+    checkAuth();
   }, [])
 
   // Set up periodic auth check to handle token expiration (less frequent for better performance)

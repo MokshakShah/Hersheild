@@ -32,32 +32,27 @@ export function PersonalContacts() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    Personal Contacts
-                </CardTitle>
-                <CardDescription>
-                    {loading ? 'Loading contacts...' : `${totalContacts} contact${totalContacts !== 1 ? 's' : ''} • ${emergencyContacts.length} emergency`}
-                </CardDescription>
+                <CardTitle className="text-lg font-bold">Personal Contacts</CardTitle>
             </CardHeader>
             <CardContent>
-                {/* <p className="text-sm text-muted-foreground">
-                    You can add, edit, or remove your trusted emergency contacts. These are the people who will receive an alert with your location when you trigger an SOS.
-                </p> */}
-                {!loading && totalContacts > 0 && (
-                    <div className="mt-3 p-2 bg-muted rounded-md">
-                        <p className="text-xs text-muted-foreground">
-                            <strong>Recent contacts:</strong> {contacts.slice(0, 3).map(c => c.name).join(', ')}
-                            {totalContacts > 3 && ` and ${totalContacts - 3} more`}
-                        </p>
+                {loading ? (
+                    <p className="text-sm text-muted-foreground">Loading contacts...</p>
+                ) : contacts.length > 0 ? (
+                    <div className="border rounded-md p-3 mb-3">
+                        {contacts.map((contact) => (
+                            <div key={contact._id} className="mb-2">
+                                <span className="font-semibold">{contact.name}</span>
+                                <span className="ml-2 text-sm text-muted-foreground">{contact.phoneNumber}</span>
+                            </div>
+                        ))}
                     </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground">No contacts added yet.</p>
                 )}
-            </CardContent>
-            <CardFooter>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full mt-2">
                     <Link href="/contacts">Manage Contacts</Link>
                 </Button>
-            </CardFooter>
+            </CardContent>
         </Card>
     );
 }

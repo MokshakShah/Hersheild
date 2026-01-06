@@ -1,15 +1,15 @@
 "use client";
 
-import { EmergencyContacts } from "../components/EmergencyContacts";
+import Link from "next/link";
 import { FeatureToggles } from "../components/FeatureToggler";
 import { LiveLocation } from "../components/LiveLocation";
-import { SOSButton } from "../components/SOSButton";
 import { AuthStatus } from "../components/AuthStatus";
 import { useToast } from "../hooks/use-toast";
 import { useAuth } from "../contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { ActionButtons } from "../components/ActionButton";
+import { SOSButton } from "../components/SOSButton";
 import { PersonalContacts } from "../components/PersonalContacts";
 import { sendEmergencySms } from "./actions";
 import { Shield, User, Calendar } from "lucide-react";
@@ -56,7 +56,7 @@ export default function Home() {
 
     // Check if we can get the current position
     navigator.permissions?.query({ name: 'geolocation' }).then((result) => {
-      console.log('Location permission status:', result.state);
+      // console.log('Location permission status:', result.state);
       
       if (result.state === 'denied') {
         toast({
@@ -300,41 +300,45 @@ export default function Home() {
   });
 
   return (
-    <div className="space-y-4 pb-20 relative">
-      {/* Top Bar: Logo, Username, SOS Button */}
-      <div className="flex items-center justify-between pt-4 px-4">
-        {/* Dashboard with Logo and Username */}
-        <div className="flex flex-col items-start">
-          <span className="flex items-center gap-2">
-          </span>
-          <span className="text-sm text-muted-foreground font-medium mt-1">{user?.name}</span>
-        </div>
-        {/* SOS Button on right */}
-        <div className="flex-shrink-0">
+    <div className="min-h-screen bg-muted/40">
+      {/* Top bar with only alerts */}
+      <div className="flex items-center justify-end px-4 py-2 bg-transparent">
+        {/* SOS Button at top right */}
+        <div className="mr-2">
           <SOSButton onSos={handleSos} />
         </div>
       </div>
-
-      {/* Emergency Services below top bar */}
-      <div className="pt-2 px-2">
-        <EmergencyContacts />
-      </div>
-
       {/* Main Dashboard Content */}
-      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
-        <div className="grid gap-4 lg:col-span-2">
-          <div className="grid gap-4 md:grid-cols-2">
-            <ActionButtons />
-            <FeatureToggles onSos={handleSos} />
-          </div>
-          <div className="lg:col-span-2">
-            <NearbyServices />
+      <div className="space-y-4 pb-20 relative">
+        {/* Emergency Services and Nearby Help navigation */}
+        <div className="pt-2 px-2">
+          <div className="flex flex-row gap-8 items-center justify-center">
+            <Link href="/emergency-service" className="flex-1 max-w-[270px]">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 transition text-center shadow-sm">
+                <span className="text-xl font-semibold">Emergency Service</span>
+              </div>
+            </Link>
+            <Link href="/nearby-help" className="flex-1 max-w-[270px]">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 transition text-center shadow-sm">
+                <span className="text-xl font-semibold">Nearby Help</span>
+              </div>
+            </Link>
           </div>
         </div>
-        <div className="grid gap-4">
-          {/* <AuthStatus /> removed as requested */}
-          <PersonalContacts />
-          <LiveLocation />
+
+        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
+          <div className="grid gap-4 lg:col-span-2">
+            <div className="grid gap-4 md:grid-cols-2">
+              <ActionButtons />
+              <FeatureToggles onSos={handleSos} />
+            </div>
+            {/* NearbyServices moved to /nearby-help */}
+          </div>
+          <div className="grid gap-4">
+            {/* <AuthStatus /> removed as requested */}
+            <PersonalContacts />
+            <LiveLocation />
+          </div>
         </div>
       </div>
     </div>

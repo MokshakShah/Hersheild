@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useRouter } from 'next/navigation';
 import { FakeCall } from './FakeCall';
 import { evidenceService, type EvidenceLocation } from '../services/evidence';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 
 
@@ -284,11 +285,11 @@ export function ActionButtons() {
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Instantly capture evidence or schedule a distraction.</CardDescription>
+                {/* <CardDescription>Instantly capture evidence or schedule a distraction.</CardDescription> */}
             </CardHeader>
             <CardContent className="flex-grow flex flex-col justify-center gap-4">
                 {showCamera ? (
-                    <div className="flex flex-col gap-4 items-center">
+                    <div className="flex flex-col  items-center">
                         <div className="w-full relative">
                             <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
                             {hasCameraPermission === false && (
@@ -351,48 +352,65 @@ export function ActionButtons() {
                         <Button variant="secondary" onClick={() => setShowTimerOptions(false)}>Cancel</Button>
                     </div>
                 ) : (
-                    <>
-                        <Button className="w-full" variant="outline" onClick={handleToggleCamera} disabled={isCameraLoading}>
-                            {isCameraLoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Loading Camera...
-                                </>
-                            ) : (
-                                <>
-                                    <Camera className="mr-2 h-5 w-5" />
-                                    Capture Photo
-                                </>
-                            )}
-                        </Button>
-                        <Button
-                            className="w-full"
-                            variant={isRecording ? 'destructive' : 'outline'}
-                            onClick={handleRecordToggle}
-                            disabled={isSavingAudio}
-                        >
-                            {isSavingAudio ? (
-                                <>
-                                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Saving...
-                                </>
-                            ) : isRecording ? (
-                                <>
-                                    <Square className="mr-2 h-5 w-5" />
-                                    Stop Recording
-                                </>
-                            ) : (
-                                <>
-                                    <Mic className="mr-2 h-5 w-5" />
-                                    Record Audio
-                                </>
-                            )}
-                        </Button>
-                        <Button className="w-full" variant="outline" onClick={() => setShowTimerOptions(true)}>
-                            <PhoneIncoming className="mr-2 h-5 w-5" />
-                            Schedule Fake Call
-                        </Button>
-                    </>
+                    <div className="w-full flex flex-col items-center">
+                        <div className="flex w-full justify-between items-end border-2  rounded-md p-4 mb-2">
+                            {/* Camera Icon */}
+                            <div className="flex flex-col items-center flex-1">
+                                <Button
+                                    variant="ghost"
+                                    className="rounded-full p-4 mb-1"
+                                    onClick={handleToggleCamera}
+                                    disabled={isCameraLoading}
+                                    aria-label="Open Camera"
+                                >
+                                    <Camera className="h-8 w-8" />
+                                </Button>
+                                <span className="font-semibold text-sm">Camera</span>
+                            </div>
+                            {/* Audio Icon */}
+                            <div className="flex flex-col items-center flex-1">
+                                <Button
+                                    variant={isRecording ? 'destructive' : 'ghost'}
+                                    className="rounded-full p-4 mb-1"
+                                    onClick={handleRecordToggle}
+                                    disabled={isSavingAudio}
+                                    aria-label={isRecording ? "Stop Recording" : "Record Audio"}
+                                >
+                                    {isRecording ? <Square className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
+                                </Button>
+                                <span className="font-semibold text-sm">Audio</span>
+                            </div>
+                            {/* Fake Call Icon with Dropdown */}
+                            <div className="flex flex-col items-center flex-1">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            className="rounded-full p-4 mb-1"
+                                            aria-label="Fake Call"
+                                        >
+                                            <PhoneIncoming className="h-8 w-8" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="center">
+                                        <DropdownMenuItem onClick={() => handleScheduleCall(10000)}>
+                                            In 10 seconds
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleScheduleCall(30000)}>
+                                            In 30 seconds
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleScheduleCall(60000)}>
+                                            In 1 minute
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <span className="font-semibold text-sm">Fake Call</span>
+                            </div>
+                        </div>
+                        {/* Optionally, show status or helper text below */}
+                        {isSavingAudio && <div className="text-xs text-muted-foreground mt-2">Saving audio...</div>}
+                        {isCameraLoading && <div className="text-xs text-muted-foreground mt-2">Loading camera...</div>}
+                    </div>
                 )}
             </CardContent>
         </Card>
