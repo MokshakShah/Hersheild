@@ -58,7 +58,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar  className="bg-gray-200">
+      <Sidebar  className="bg-sidebar">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
             <img src="sounds/logo.png" alt="Logo" className="h-7 w-7 object-contain" />

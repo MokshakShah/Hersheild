@@ -48,7 +48,7 @@ export default function EmergencyServicePage() {
             <h4 className="text-sm font-medium mb-2">Official Emergency Numbers</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {emergencyServices.map((service) => (
-                <Button variant="outline" asChild key={service.name} className="h-auto p-4">
+                <Button variant="outline" asChild key={service.name} className="h-auto p-4 bg-white">
                   <a href={`tel:${service.number}`} className="flex flex-col items-center gap-2 text-center">
                     <div className="text-primary">{service.icon}</div>
                     <span className="font-semibold">{service.name}</span>

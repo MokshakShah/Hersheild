@@ -49,7 +49,7 @@ export function PersonalContacts() {
                 ) : (
                     <p className="text-sm text-muted-foreground">No contacts added yet.</p>
                 )}
-                <Button asChild className="w-full mt-2">
+                <Button asChild className="w-full mt-2 bg-white text-primary">
                     <Link href="/contacts">Manage Contacts</Link>
                 </Button>
             </CardContent>

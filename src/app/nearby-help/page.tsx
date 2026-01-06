@@ -121,9 +121,9 @@ export default function NearbyHelpPage() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-sm text-muted-foreground">Radius: {(radius/1000).toFixed(1)} km</div>
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => setRadius(r => Math.max(500, r-500))}>-</Button>
+              <Button size="sm" variant="outline" onClick={() => setRadius(r => Math.max(500, r-500))} className="bg-white">-</Button>
               <Badge variant="secondary">{radius} m</Badge>
-              <Button size="sm" variant="outline" onClick={() => setRadius(r => Math.min(5000, r+500))}>+</Button>
+              <Button size="sm" variant="outline" onClick={() => setRadius(r => Math.min(5000, r+500))} className="bg-white">+</Button>
             </div>
             {error && <div className="text-sm text-red-600 flex items-center gap-1"><AlertTriangle className="h-4 w-4" /> {error}</div>}
           </div>
@@ -145,7 +145,7 @@ export default function NearbyHelpPage() {
                     </div>
                     {position && (
                       <div className="mt-1">
-                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/dir/${position.lat},${position.lon}/${h.lat},${h.lon}`, '_blank')}>
+                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/dir/${position.lat},${position.lon}/${h.lat},${h.lon}`, '_blank')} className="bg-white">
                           Directions <ExternalLink className="h-4 w-4 ml-1" />
                         </Button>
                       </div>
@@ -170,7 +170,7 @@ export default function NearbyHelpPage() {
                     </div>
                     {position && (
                       <div className="mt-1">
-                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/dir/${position.lat},${position.lon}/${p.lat},${p.lon}`, '_blank')}>
+                        <Button variant="outline" size="sm" onClick={() => window.open(`https://www.google.com/maps/dir/${position.lat},${position.lon}/${p.lat},${p.lon}`, '_blank')} className="bg-white">
                           Directions <ExternalLink className="h-4 w-4 ml-1" />
                         </Button>
                       </div>

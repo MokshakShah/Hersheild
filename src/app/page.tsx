@@ -300,7 +300,7 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFE6EC 0%, #FFD1DC 50%, #FFF5F7 100%)' }}>
+    <div className="min-h-screen">
       {/* Top bar with only alerts */}
       <div className="flex items-center justify-end px-4 py-2 bg-transparent">
         {/* SOS Button at top right */}
@@ -314,12 +314,12 @@ export default function Home() {
         <div className="pt-2 px-2">
           <div className="flex flex-row gap-8 items-center justify-center">
             <Link href="/emergency-service" className="flex-1 max-w-[270px]">
-              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-pink-50 transition text-center shadow-sm">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-white transition text-center shadow-sm">
                 <span className="text-xl font-semibold">Emergency Service</span>
               </div>
             </Link>
             <Link href="/nearby-help" className="flex-1 max-w-[270px]">
-              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-pink-50 transition text-center shadow-sm">
+              <div className="flex items-center justify-center min-h-[135px] rounded-2xl bg-white border border-pink-200 hover:bg-white transition text-center shadow-sm">
                 <span className="text-xl font-semibold">Nearby Help</span>
               </div>
             </Link>
@@ -329,14 +329,20 @@ export default function Home() {
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:grid-cols-3">
           <div className="grid gap-4 lg:col-span-2">
             <div className="grid gap-4 md:grid-cols-2">
-              <ActionButtons />
-              <FeatureToggles onSos={handleSos} />
+              <div className="bg-white rounded-lg p-4">
+                <ActionButtons />
+              </div>
+              <div className="bg-white rounded-lg p-4">
+                <FeatureToggles onSos={handleSos} />
+              </div>
             </div>
             {/* NearbyServices moved to /nearby-help */}
           </div>
           <div className="grid gap-4">
             {/* <AuthStatus /> removed as requested */}
-            <PersonalContacts />
+            <div className="bg-white rounded-lg p-4">
+              <PersonalContacts />
+            </div>
             <LiveLocation />
           </div>
         </div>

@@ -32,7 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     try {
       // console.log('Checking auth status...')
-      const response = await fetch('/api/auth/profile')
+      const response = await fetch('/api/auth/profile', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      })
+
       if (response.ok) {
         const data = await response.json()
         // console.log('Auth successful:', data.user)
@@ -40,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Set per-user key for evidence storage
         // evidenceService.setUserKey(data.user?.id)
       } else {
-        console.log('Auth failed, status:', response.status)
+        console.log('Auth failed, status:', response.status, response.statusText)
         setUser(null)
         evidenceService.setUserKey(null)
         // If token is invalid, clear any existing cookies
@@ -50,6 +58,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Auth check error:', error)
+      // Handle different types of errors
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('Network error: Unable to connect to authentication service. App will work in offline mode.')
+        // Don't show error toast for network issues, just log and continue
+      } else if (error.name === 'AbortError') {
+        console.error('Auth check timed out')
+      } else {
+        console.error('Unexpected auth error:', error)
+      }
       setUser(null)
     } finally {
       setLoading(false)
@@ -68,8 +85,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
     }
-    // Immediate auth check for faster response
-    checkAuth();
+
+    // Add a small delay to ensure the server is ready
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [])
 
   // Set up periodic auth check to handle token expiration (less frequent for better performance)

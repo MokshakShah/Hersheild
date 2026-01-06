@@ -155,7 +155,7 @@ export default function SelfDefensePage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {safetyTips.map((tip, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border bg-gray-50">
+              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border bg-white">
                 {tip.icon}
                 <div>
                   <h4 className="font-medium text-sm">{tip.title}</h4>
@@ -172,7 +172,7 @@ export default function SelfDefensePage() {
         {tutorials.map((tutorial) => (
           <Card key={tutorial.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative">
-              <div className="aspect-video bg-gray-200 overflow-hidden">
+              <div className="aspect-video bg-white overflow-hidden">
                 <img 
                   src={tutorial.thumbnail} 
                   alt={tutorial.title}

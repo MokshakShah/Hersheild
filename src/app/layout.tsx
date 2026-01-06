@@ -21,7 +21,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased" style={{ background: 'linear-gradient(180deg, #FFE6EC 0%, #FFD1DC 50%, #FFF5F7 100%)', minHeight: '100vh' }}>
         <AuthProvider>
           <AppLayout>
             {children}
