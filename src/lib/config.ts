@@ -16,10 +16,10 @@ export const config = {
 
 // Log environment variables for debugging (remove in production)
 if (typeof console !== 'undefined') {
-  console.log('Environment variables check:');
-  console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET' : 'NOT SET');
-  console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'SET' : 'NOT SET');
-  console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
-  console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
-  console.log('NODE_ENV:', process.env.NODE_ENV);
+  // console.log('Environment variables check:');
+  // console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET' : 'NOT SET');
+  // console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'SET' : 'NOT SET');
+  // console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
+  // console.log('SUPABASE_ANON_KEY:', process.env.SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
+  // console.log('NODE_ENV:', process.env.NODE_ENV);
 }

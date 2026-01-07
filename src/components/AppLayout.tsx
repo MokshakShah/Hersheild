@@ -18,6 +18,7 @@ import { Shield, BookOpen, LayoutDashboard, Users, LogIn, LogOut, Archive, User,
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
+import SidebarNews from "./SidebarNews"
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -109,7 +110,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-
+                        {/* News Sidebar Link */}
+                        <SidebarMenuItem>
+                          <SidebarNews />
+                        </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname === "/self-defense"}>
                 <Link href="/self-defense">
