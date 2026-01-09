@@ -12,11 +12,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [user, loading, router])
+        useEffect(() => {
+          if (!loading && !user) {
+            // Store last attempted path for redirect after login
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('hersheild-last-path', window.location.pathname + window.location.search)
+              sessionStorage.setItem('hersheild-session-expired', '1')
+            }
+            router.push('/login')
+          }
+        }, [user, loading, router])
 
   // Show loading spinner while checking authentication
   if (loading) {
