@@ -40,9 +40,21 @@ export function PersonalContacts() {
                 ) : contacts.length > 0 ? (
                     <div className="border rounded-md p-3 mb-3">
                         {contacts.map((contact) => (
-                            <div key={contact._id} className="mb-2">
-                                <span className="font-semibold">{contact.name}</span>
-                                <span className="ml-2 text-sm text-muted-foreground">{contact.phoneNumber}</span>
+                            <div
+                                key={contact._id}
+                                className="mb-3 flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition"
+                            >
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-gray-800 text-base">{contact.name}</span>
+                                    <span className="text-sm text-gray-500">{contact.phoneNumber}</span>
+                                </div>
+                                <a
+                                    href={`tel:${contact.phoneNumber}`}
+                                    className="ml-4 px-4 py-2 bg-pink-500 text-white rounded-full font-semibold text-sm shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition"
+                                    aria-label={`Call ${contact.name}`}
+                                >
+                                    Call
+                                </a>
                             </div>
                         ))}
                     </div>
