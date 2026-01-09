@@ -14,7 +14,7 @@ export default function SelfDefensePage() {
       duration: "8:45",
       difficulty: "Beginner",
       instructor: "Krav Maga Expert",
-     
+      thumbnail: "https://img.youtube.com/vi/KVpxP3ZZtAc/maxresdefault.jpg",
       videoUrl: "https://www.youtube.com/watch?v=KVpxP3ZZtAc",
       tags: ["Basic", "Strikes", "Escapes"]
     },
@@ -25,7 +25,7 @@ export default function SelfDefensePage() {
       duration: "12:30",
       difficulty: "Beginner",
       instructor: "Self-Defense Instructor",
-      
+      thumbnail: "https://img.youtube.com/vi/PnhdEQG86qc/maxresdefault.jpg",
       videoUrl: "https://youtu.be/PnhdEQG86qc?si=94kWnOFQk_AffFH5",
       tags: ["Escapes", "Grabs", "Holds"]
     },
@@ -36,7 +36,7 @@ export default function SelfDefensePage() {
       duration: "10:15",
       difficulty: "Intermediate",
       instructor: "Personal Safety Expert",
-      
+      thumbnail: "https://img.youtube.com/vi/T46CjA9mAY0/maxresdefault.jpg",
       videoUrl: "https://youtu.be/T46CjA9mAY0?si=P4D6Ja2abH6mwZDv",
       tags: ["Improvise", "Objects", "Tools"]
     },
@@ -47,7 +47,7 @@ export default function SelfDefensePage() {
       duration: "15:20",
       difficulty: "Beginner",
       instructor: "Security Specialist",
-    
+      thumbnail: "https://img.youtube.com/vi/65mJ_wfeIvQ/maxresdefault.jpg",
       videoUrl: "https://youtu.be/65mJ_wfeIvQ?si=q2ja7pjthFsuW728",
       tags: ["Awareness", "Prevention", "Safety"]
     },
@@ -58,7 +58,7 @@ export default function SelfDefensePage() {
       duration: "11:45",
       difficulty: "Intermediate",
       instructor: "Women's Safety Coach",
-     
+      thumbnail: "https://img.youtube.com/vi/0LwLqpfDypg/maxresdefault.jpg",
       videoUrl: "https://www.youtube.com/shorts/0LwLqpfDypg",
       tags: ["Night Safety", "Walking", "Street Safety"]
     },
@@ -69,7 +69,7 @@ export default function SelfDefensePage() {
       duration: "9:30",
       difficulty: "Beginner",
       instructor: "Psychology & Self-Defense",
-     
+      thumbnail: "https://img.youtube.com/vi/nNtCUe5EylI/maxresdefault.jpg",
       videoUrl: "https://youtu.be/nNtCUe5EylI?si=S9kxgDjv2koE73it",
       tags: ["Mental", "Confidence", "Mindset"]
     },
@@ -80,7 +80,7 @@ export default function SelfDefensePage() {
       duration: "13:20",
       difficulty: "Intermediate",
       instructor: "Martial Arts Expert",
-      
+      thumbnail: "https://img.youtube.com/vi/R2hpqOQREVQ/maxresdefault.jpg",
       videoUrl: "https://youtu.be/R2hpqOQREVQ?si=qnFDcm6natUbVeOY",
       tags: ["Ground", "Defense", "Techniques"]
     },
@@ -91,7 +91,7 @@ export default function SelfDefensePage() {
       duration: "16:45",
       difficulty: "Advanced",
       instructor: "Combat Specialist",
-      
+      thumbnail: "https://img.youtube.com/vi/jAh0cU1J5zk/maxresdefault.jpg",
       videoUrl: "https://youtu.be/jAh0cU1J5zk?si=jIMAIuTSi3BEzciD",
       tags: ["Multiple", "Attackers", "Advanced"]
     }
@@ -155,7 +155,7 @@ export default function SelfDefensePage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {safetyTips.map((tip, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border bg-white">
+              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border bg-gray-50">
                 {tip.icon}
                 <div>
                   <h4 className="font-medium text-sm">{tip.title}</h4>
@@ -172,7 +172,7 @@ export default function SelfDefensePage() {
         {tutorials.map((tutorial) => (
           <Card key={tutorial.id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="relative">
-              <div className="aspect-video bg-white overflow-hidden">
+              <div className="aspect-video bg-gray-200 overflow-hidden">
                 <img 
                   src={tutorial.thumbnail} 
                   alt={tutorial.title}

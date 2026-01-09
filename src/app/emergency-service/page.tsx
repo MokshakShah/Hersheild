@@ -51,7 +51,7 @@ export default function EmergencyServicePage() {
                 <Button variant="outline" asChild key={service.name} className="h-auto p-4 bg-white">
                   <a href={`tel:${service.number}`} className="flex flex-col items-center gap-2 text-center">
                     <div className="text-primary">{service.icon}</div>
-                    <span className="font-semibold">{service.name}</span>
+                    <span className="font-semibold text-[10px]">{service.name}</span>
                     <span className="text-sm text-muted-foreground">{service.number}</span>
                   </a>
                 </Button>

@@ -104,10 +104,16 @@ export default function ContactsPage() {
       return;
     }
 
+    // Ensure phone number is properly formatted
+    const formattedFormData = {
+      ...formData,
+      phoneNumber: formatPhoneForInput(formData.phoneNumber),
+    };
+
     try {
       if (editingContact) {
         // Update existing contact
-        const result = await updateContact(editingContact._id!, formData);
+        const result = await updateContact(editingContact._id!, formattedFormData);
         if (result.success) {
           toast({
             title: "Success",
@@ -124,7 +130,7 @@ export default function ContactsPage() {
         }
       } else {
         // Create new contact
-        const result = await createContact(formData);
+        const result = await createContact(formattedFormData);
         if (result.success) {
           toast({
             title: "Success",
@@ -154,7 +160,7 @@ export default function ContactsPage() {
     setEditingContact(contact);
     setFormData({
       name: contact.name,
-      phoneNumber: contact.phoneNumber,
+      phoneNumber: formatPhoneForDisplay(contact.phoneNumber), // Format for display (remove +91)
       relationship: contact.relationship || "",
       isEmergency: contact.isEmergency,
     });

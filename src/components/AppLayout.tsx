@@ -62,7 +62,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar  className="bg-sidebar">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <img src="sounds/logo.png" alt="Logo" className="h-7 w-7 object-contain" />
+            <img src="sounds/logo.jpeg" alt="Logo" className="h-7 w-7 object-contain" />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">Hersheild</h2>
               <p className="text-xs text-muted-foreground">Your safety companion</p>
@@ -160,7 +160,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <h1 className="text-xl font-semibold capitalize">
               {pathname === '/' ? 'Dashboard' : pathname.substring(1).replace('-', ' ')}
             </h1>
-            <img src="sounds/logo.png" alt="Logo" className="h-8 w-8 object-contain ml-2" />
+            <img src="sounds/logo.jpeg" alt="Logo" className="h-8 w-8 object-contain ml-2" />
           </div>
           {/* <div className="text-sm text-muted-foreground">
             Welcome, {user.name}

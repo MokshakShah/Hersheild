@@ -9,7 +9,7 @@ export default function SidebarNews() {
     <Link
       href="/news"
       className={cn(
-        'flex items-center gap-2 px-3 py-2 rounded transition',
+        'flex items-center gap-2 px-2 py-2 rounded transition',
         pathname === '/news'
       )}
       prefetch={false}
